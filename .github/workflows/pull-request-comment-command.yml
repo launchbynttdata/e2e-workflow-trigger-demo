@@ -4,7 +4,7 @@ on:
 
 jobs:
   get-comment-branch:
-    if: ${{ github.event.issue.pull_request }}
+    if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, '/test e2e') }}
     runs-on: ubuntu-latest
     outputs:
       branch-name: ${{ steps.get-branch-name.outputs.branch-name }}
