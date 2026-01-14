@@ -1,0 +1,26 @@
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  get-comment-branch:
+    if: ${{ github.event.issue.pull_request }}
+    runs-on: ubuntu-latest
+    outputs:
+      branch-name: ${{ steps.get-branch-name.outputs.branch-name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Retrieve branch name for pull request
+        id: get-branch-name
+        run: |
+          BRANCH_NAME=$(gh pr view "${{ github.event.issue.pull_request.url }}" --json headRefName --jq .headRefName)
+          echo "branch-name=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
+
+  call-e2e-workflow:
+    if: ${{ github.event.issue.pull_request }}
+    uses: launchbynttdata/e2e-workflow-trigger-demo/.github/workflows/playwright.yml@main
+    needs: [get-comment-branch]
+    with:
+      branch-name: ${{ needs.get-comment-branch.outputs.branch-name }}
