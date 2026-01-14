@@ -29,8 +29,6 @@ jobs:
           echo "branch-name=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
 
   call-e2e-workflow:
-    permissions:
-      actions: write
     if: ${{ github.event.issue.pull_request }}
     uses: launchbynttdata/e2e-workflow-trigger-demo/.github/workflows/playwright.yml@main
     needs: [get-comment-branch]
