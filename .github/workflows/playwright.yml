@@ -51,8 +51,8 @@ jobs:
           > [!IMPORTANT]
           > E2E test run has completed!
 
-          Your test results can be [found here](${{ steps.upload-artifact.outputs.artifact-url }}).
+          Your test results can be [found here.](${{ steps.upload-artifact.outputs.artifact-url }}).
           EOC
 
-          gh pr comment "${PR_NUMBER}" --delete-last
+          gh pr comment "${PR_NUMBER}" --delete-last --yes
           gh pr comment "${PR_NUMBER}" --create --body-file e2e_comment.md
