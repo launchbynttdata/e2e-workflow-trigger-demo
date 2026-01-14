@@ -14,6 +14,8 @@ jobs:
 
       - name: Retrieve branch name for pull request
         id: get-branch-name
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           BRANCH_NAME=$(gh pr view "${{ github.event.issue.pull_request.url }}" --json headRefName --jq .headRefName)
           echo "branch-name=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
