@@ -13,6 +13,7 @@ on:
       e2e-summary:
         description: "E2E summary in markdown format"
         value: ${{ jobs.test.outputs.e2e-summary }}
+  workflow_dispatch:
 
 permissions:
   checks: write
@@ -27,9 +28,30 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - id: checkout
+        uses: actions/checkout@v5
         with:
           ref: ${{ inputs.branch-name }}
+
+      - id: get-update-vars
+        run: |
+          HEAD_SHA=$(git rev-parse HEAD)
+          OWNER=$(echo $GITHUB_REPOSITORY | awk -F'/' '{print $1}')
+          REPOSITORY=$(echo $GITHUB_REPOSITORY | awk -F'/' '{print $1}')
+
+          echo "head-sha=$HEAD_SHA" >> "$GITHUB_OUTPUT"
+          echo "owner=$OWNER" >> "$GITHUB_OUTPUT"
+          echo "repository=$REPOSITORY" >> "$GITHUB_OUTPUT"
+
+      - uses: launchbynttdata/e2e-workflow-trigger-demo/.github/actions/update-e2e-status-check@main
+        with:
+          state: in_progress
+          context: E2E
+          description: E2E tests running
+          sha: ${{ steps.get-update-vars.outputs.head-sha }}
+          owner: ${{ steps.get-update-vars.outputs.owner }}
+          repo: ${{ steps.get-update-vars.outputs.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@v4
         with:

@@ -12,12 +12,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Create E2E status check
-        uses: launchbynttdata/e2e-workflow-trigger-demo/.github/actions/create-e2e-status-check@main
+      - id: get-update-vars
+        run: |
+          OWNER=$(echo $GITHUB_REPOSITORY | awk -F'/' '{print $1}')
+          REPOSITORY=$(echo $GITHUB_REPOSITORY | awk -F'/' '{print $1}')
+
+          echo "owner=$OWNER" >> "$GITHUB_OUTPUT"
+          echo "repository=$REPOSITORY" >> "$GITHUB_OUTPUT"
+
+      - uses: launchbynttdata/e2e-workflow-trigger-demo/.github/actions/update-e2e-status-check@main
         with:
-          repo: e2e-workflow-trigger-demo
-          owner: launchbynttdata
+          state: requested
+          context: E2E
+          description: "Comment '/e2e test' to run"
           sha: ${{ github.event.pull_request.head.sha }}
+          owner: ${{ steps.get-update-vars.outputs.owner }}
+          repo: ${{ steps.get-update-vars.outputs.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Node.js

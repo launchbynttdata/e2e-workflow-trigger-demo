@@ -33,4 +33,4 @@ runs:
           -H "Authorization: Bearer ${{ inputs.GITHUB_TOKEN }}" \
           -H "X-GitHub-Api-Version: 2022-11-28" \
           https://api.github.com/repos/${{ inputs.owner }}/${{ inputs.repo }}/statuses/${{ inputs.sha }} \
-          -d '{"state":"pending","description":"trigger by commenting /test e2e","context":"E2E"}'
+          -d '{"state":"expected","description":"trigger by commenting /test e2e","context":"E2E"}'

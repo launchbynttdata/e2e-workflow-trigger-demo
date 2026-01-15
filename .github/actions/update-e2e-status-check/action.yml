@@ -1,9 +1,14 @@
 name: Update E2E Status Check
 description: Updates the status check for a commit.
 inputs:
-  success:
-    description: "Whether E2E tests have succeeded (true/false)"
-    default: "true"
+  status:
+    description: "Status to set on the check, one of 'expected', 'completed', 'in_progress'"
+    required: true
+  conclusion:
+    description: "If the check is in a 'completed' status, provide a conclusion like 'success', 'failure', 'cancelled', etc."
+    required: true
+  context:
+    description: "Context of the status check, e.g. 'E2E'"
     required: true
   sha:
     description: "SHA of the commit on which to create the status check"
