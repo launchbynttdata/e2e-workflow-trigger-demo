@@ -47,4 +47,4 @@ jobs:
       repo: e2e-workflow-trigger-demo
       owner: launchbynttdata
       sha: ${{ needs.get-comment-branch.outputs.head-sha }}
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    secrets: inherit
