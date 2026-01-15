@@ -14,6 +14,10 @@ inputs:
     description: "Description to set on the status check"
     default: ""
     required: false
+  target_url:
+    description: "URL to associate with the check"
+    default: ""
+    required: false
   sha:
     description: "SHA of the commit on which to create the status check"
     required: true
@@ -45,6 +49,11 @@ runs:
         if [ "${{ inputs.state }}" == "completed" ]; then 
           tmpfile=$(mktemp)
           jq '.conclusion = "${{ inputs.conclusion }}"' status-payload.json > "$tmpfile" && mv "$tmpfile" status-payload.json
+        fi
+
+        if ![ "${{ inputs.target }}" == "" ]; then 
+          tmpfile=$(mktemp)
+          jq '.target_url = "${{ inputs.target_url }}"' status-payload.json > "$tmpfile" && mv "$tmpfile" status-payload.json
         fi
 
         curl -L \
