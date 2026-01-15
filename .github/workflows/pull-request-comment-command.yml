@@ -86,5 +86,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "${{ needs.call-e2e-workflow.outputs.e2e-outcome }}" > e2e_comment.md
+          echo "${{ needs.call-e2e-workflow.outputs.e2e-summary }}" > e2e_comment.md
           gh pr comment "${{ needs.get-comment-branch.outputs.pr-number }}" --create-if-none --edit-last --body-file e2e_comment.md
