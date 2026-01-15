@@ -31,7 +31,7 @@ jobs:
         run: |
           BRANCH_NAME=$(gh pr view "${{ github.event.issue.pull_request.html_url }}" --json headRefName --jq .headRefName)
           SHA=$(gh pr view "${{ github.event.issue.pull_request.html_url }}" --json headRefOid --jq .headRefOid)
-          PR_NUMBER=$(gh pr view "${{ github.event.issue.pull_request.html_url }}" --json id --jq .id)
+          PR_NUMBER=$(gh pr view "${{ github.event.issue.pull_request.html_url }}" --json number --jq .number)
 
           echo "branch-name=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
           echo "head-sha=$SHA" >> "$GITHUB_OUTPUT"
