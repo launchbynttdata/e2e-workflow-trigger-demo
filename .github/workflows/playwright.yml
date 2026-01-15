@@ -8,6 +8,7 @@ on:
         type: string
 
 permissions:
+  checks: write
   contents: write
   pull-requests: write
 
@@ -71,21 +72,6 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
-
-      # - id: create-comment
-      #   name: Create comment with Playright output
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   run: |
-      #     cat <<EOC > e2e_comment.md
-      #     > [!IMPORTANT]
-      #     > E2E test run has completed!
-
-      #     Your test results can be [found here](${{ steps.upload-artifact.outputs.artifact-url }}).
-      #     EOC
-
-      #     gh pr comment "${PR_NUMBER}" --delete-last --yes || true
-      #     gh pr comment "${PR_NUMBER}" --body-file e2e_comment.md
 
       - uses: daun/playwright-report-summary@v3
         if: ${{ !cancelled() }}
