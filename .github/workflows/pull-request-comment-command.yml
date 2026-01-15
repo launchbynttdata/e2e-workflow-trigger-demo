@@ -39,6 +39,18 @@ jobs:
           comment-id: ${{ github.event.comment.id }}
           reactions: "rocket"
 
+      - name: Create placeholder comment
+        run: |
+          cat <<EOC > e2e_comment.md
+          > [!IMPORTANT]
+          > E2E test run has been triggered!
+          This comment will be updated with the outcome once the job completes.
+          EOC
+
+          # Delete the existing comment, if there is one
+          gh pr comment "${PR_NUMBER}" --delete-last --yes || true
+          gh pr comment "${PR_NUMBER}" --body-file e2e_comment.md
+
   call-e2e-workflow:
     if: ${{ github.event.issue.pull_request }}
     uses: launchbynttdata/e2e-workflow-trigger-demo/.github/workflows/playwright.yml@main
@@ -51,6 +63,7 @@ jobs:
       checks: write
       statuses: write
       contents: read
+      pull-requests: write
     needs: [get-comment-branch, call-e2e-workflow]
     runs-on: ubuntu-latest
     steps:
@@ -62,3 +75,9 @@ jobs:
           owner: launchbynttdata
           sha: ${{ needs.get-comment-branch.outputs.head-sha }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Write testing outcome comment
+        run: |
+          echo "${{ needs.call-e2e-workflow.outputs.e2e-outcome }}" > e2e_comment.md
+          gh pr comment "${PR_NUMBER}" --create-if-none --edit-last --body-file e2e_comment.md
