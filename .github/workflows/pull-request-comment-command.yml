@@ -40,6 +40,8 @@ jobs:
           reactions: "rocket"
 
       - name: Create placeholder comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cat <<EOC > e2e_comment.md
           > [!IMPORTANT]
