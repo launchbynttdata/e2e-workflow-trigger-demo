@@ -40,11 +40,30 @@ jobs:
           OWNER=$(echo $GITHUB_REPOSITORY | awk -F'/' '{print $1}')
           REPOSITORY=$(echo $GITHUB_REPOSITORY | awk -F'/' '{print $2}')
           TARGET_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          PR_NUMBER=$(gh pr view "${{ github.event.issue.pull_request.html_url }}" --json number --jq .number)
 
           echo "head-sha=$HEAD_SHA" >> "$GITHUB_OUTPUT"
           echo "owner=$OWNER" >> "$GITHUB_OUTPUT"
           echo "repository=$REPOSITORY" >> "$GITHUB_OUTPUT"
           echo "target-url=$TARGET_URL" >> "$GITHUB_OUTPUT"
+          echo "pr-number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+
+      - id: placeholder-comment
+        name: Create placeholder comment
+        # Don't try to create a comment when the workflow is manually triggered through the UI
+        if: github.event.workflow != '.github/workflows/playwright.yml'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cat <<EOC > e2e_comment.md
+          > [!IMPORTANT]
+          > E2E test run has been triggered!
+          This comment will be updated with the outcome once the job completes.
+          EOC
+
+          # Delete the existing comment, if there is one
+          gh pr comment "${{ steps.get-update-vars.outputs.pr-number }}" --delete-last --yes || true
+          gh pr comment "${{ steps.get-update-vars.outputs.pr-number }}" --body-file e2e_comment.md
 
       - id: update-status-check-pending
         name: Set E2E Check URL
@@ -119,7 +138,16 @@ jobs:
           report-url: "${{ steps.upload-artifact.outputs.artifact-url }}"
           create-comment: false
 
+      - name: Write testing outcome comment
+        if: ${{ !cancelled() && github.event.workflow != '.github/workflows/playwright.yml'}}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "${{ steps.analyze-e2e-report.outputs.summary }}" > e2e_comment.md
+          gh pr comment "${{ steps.get-update-vars.outputs.pr-number }}" --create-if-none --edit-last --body-file e2e_comment.md
+
       - id: update-status-check-complete
+        if: ${{ always() }}
         name: Update Status
         uses: launchbynttdata/e2e-workflow-trigger-demo/.github/actions/update-e2e-status-check@main
         with:
