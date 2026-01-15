@@ -85,4 +85,4 @@ jobs:
           EOC
 
           gh pr comment "${PR_NUMBER}" --delete-last --yes || true
-          gh pr comment "${PR_NUMBER}" --create-if-none --body-file e2e_comment.md
+          gh pr comment "${PR_NUMBER}" --body-file e2e_comment.md
