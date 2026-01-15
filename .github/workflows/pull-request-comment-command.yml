@@ -75,8 +75,7 @@ jobs:
       - name: Update Status Check
         uses: launchbynttdata/e2e-workflow-trigger-demo/.github/actions/update-e2e-status-check@main
         with:
-          state: "completed"
-          conclusion: ${{ needs.call-e2e-workflow.outputs.e2e-outcome }}
+          state: ${{ needs.call-e2e-workflow.outputs.e2e-outcome }}
           context: E2E
           repo: e2e-workflow-trigger-demo
           owner: launchbynttdata
