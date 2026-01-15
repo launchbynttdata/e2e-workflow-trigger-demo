@@ -51,7 +51,7 @@ jobs:
         uses: launchbynttdata/e2e-workflow-trigger-demo/.github/actions/update-e2e-status-check@main
         with:
           state: pending
-          context: E2E
+          context: E2E Tests
           description: E2E tests running
           sha: ${{ steps.get-update-vars.outputs.head-sha }}
           owner: ${{ steps.get-update-vars.outputs.owner }}
@@ -124,7 +124,8 @@ jobs:
         uses: launchbynttdata/e2e-workflow-trigger-demo/.github/actions/update-e2e-status-check@main
         with:
           state: ${{ steps.run-e2e.outcome }}
-          context: E2E
+          description: E2E tests completed - ${{ steps.run-e2e.outcome }}
+          context: E2E Tests
           sha: ${{ steps.get-update-vars.outputs.head-sha }}
           owner: ${{ steps.get-update-vars.outputs.owner }}
           repo: ${{ steps.get-update-vars.outputs.repository }}
