@@ -62,6 +62,7 @@ jobs:
     needs: [get-comment-branch]
     with:
       branch-name: ${{ needs.get-comment-branch.outputs.branch-name }}
+      sha: ${{ needs.get-comment-branch.outputs.head-sha }}
 
   update-status-check-success:
     permissions:
