@@ -39,19 +39,23 @@ jobs:
           HEAD_SHA=$(git rev-parse HEAD)
           OWNER=$(echo $GITHUB_REPOSITORY | awk -F'/' '{print $1}')
           REPOSITORY=$(echo $GITHUB_REPOSITORY | awk -F'/' '{print $2}')
+          TARGET_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 
           echo "head-sha=$HEAD_SHA" >> "$GITHUB_OUTPUT"
           echo "owner=$OWNER" >> "$GITHUB_OUTPUT"
           echo "repository=$REPOSITORY" >> "$GITHUB_OUTPUT"
+          echo "target-url=$TARGET_URL" >> "$GITHUB_OUTPUT"
 
-      - uses: launchbynttdata/e2e-workflow-trigger-demo/.github/actions/update-e2e-status-check@main
+      - name: Set E2E Check URL
+        uses: launchbynttdata/e2e-workflow-trigger-demo/.github/actions/update-e2e-status-check@main
         with:
-          state: in_progress
+          state: pending
           context: E2E
           description: E2E tests running
           sha: ${{ steps.get-update-vars.outputs.head-sha }}
           owner: ${{ steps.get-update-vars.outputs.owner }}
           repo: ${{ steps.get-update-vars.outputs.repository }}
+          target_url: ${{ steps.get-update-vars.outputs.target-url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@v4
