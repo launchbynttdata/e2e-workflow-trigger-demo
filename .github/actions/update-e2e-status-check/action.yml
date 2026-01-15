@@ -20,11 +20,9 @@ inputs:
   repo:
     description: "GitHub repository name"
     required: true
-    default: "e2e-workflow-trigger-demo"
   owner:
     description: "GitHub organization or user owning the repository"
     required: true
-    default: launchbynttdata
   GITHUB_TOKEN:
     description: "GITHUB_TOKEN for interacting with the GH API"
     required: true

@@ -37,7 +37,7 @@ jobs:
         run: |
           HEAD_SHA=$(git rev-parse HEAD)
           OWNER=$(echo $GITHUB_REPOSITORY | awk -F'/' '{print $1}')
-          REPOSITORY=$(echo $GITHUB_REPOSITORY | awk -F'/' '{print $1}')
+          REPOSITORY=$(echo $GITHUB_REPOSITORY | awk -F'/' '{print $2}')
 
           echo "head-sha=$HEAD_SHA" >> "$GITHUB_OUTPUT"
           echo "owner=$OWNER" >> "$GITHUB_OUTPUT"
