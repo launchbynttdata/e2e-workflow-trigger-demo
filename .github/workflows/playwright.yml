@@ -73,6 +73,7 @@ jobs:
           cat <<EOC > e2e_comment.md
           > [!IMPORTANT]
           > E2E test run has been triggered!
+
           This comment will be updated with the outcome once the job completes.
           EOC
 
