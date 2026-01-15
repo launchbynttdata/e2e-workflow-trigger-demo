@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       branch-name: ${{ steps.get-pr-details.outputs.branch-name }}
-      head-sha: ${{ steps.get-pr-details.outputs.sha }}
+      head-sha: ${{ steps.get-pr-details.outputs.head-sha }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -29,9 +29,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           BRANCH_NAME=$(gh pr view "${{ github.event.issue.pull_request.html_url }}" --json headRefName --jq .headRefName)
-          SHA=BRANCH_NAME=$(gh pr view "${{ github.event.issue.pull_request.html_url }}" --json headRefOid --jq .headRefOid)
+          SHA=$(gh pr view "${{ github.event.issue.pull_request.html_url }}" --json headRefOid --jq .headRefOid)
           echo "branch-name=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
-          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "head-sha=$SHA" >> "$GITHUB_OUTPUT"
 
       - name: React to comment
         uses: peter-evans/create-or-update-comment@v3
