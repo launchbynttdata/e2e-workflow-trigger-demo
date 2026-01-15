@@ -42,6 +42,7 @@ jobs:
   update-status-check-success:
     permissions:
       checks: write
+      contents: read
     needs: [get-comment-branch, call-e2e-workflow]
     runs-on: ubuntu-latest
     steps:
