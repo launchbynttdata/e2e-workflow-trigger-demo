@@ -51,7 +51,7 @@ runs:
           jq '.conclusion = "${{ inputs.conclusion }}"' status-payload.json > "$tmpfile" && mv "$tmpfile" status-payload.json
         fi
 
-        if ![ "${{ inputs.target_url }}" == "" ]; then 
+        if [ "${{ inputs.target_url }}" != "" ]; then 
           tmpfile=$(mktemp)
           jq '.target_url = "${{ inputs.target_url }}"' status-payload.json > "$tmpfile" && mv "$tmpfile" status-payload.json
         fi
