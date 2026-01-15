@@ -27,8 +27,16 @@ jobs:
         id: save-cache
         if: ${{ steps.cache.outputs.cache-hit != 'true' }}
         with:
-          path: node_modules
+          path: ./node_modules
           key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
 
       - name: Lint code
         run: npm run lint
+
+      - name: Create E2E status check
+        uses: ./.github/actions/create-e2e-status-check@main
+        with:
+          repo: e2e-workflow-trigger-demo
+          org: launchbynttdata
+          sha: ${{ github.event.pull_request.head.sha }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
