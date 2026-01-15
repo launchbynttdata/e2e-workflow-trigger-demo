@@ -31,7 +31,7 @@ runs:
       id: create-status
       shell: bash
       run: |
-        if ["${{ inputs.success }}" == "true"]; then 
+        if [ "${{ inputs.success }}" == "true" ]; then 
           PAYLOAD='{"state":"success","description":"E2E tests have passed","context":"E2E"}'
         else
           PAYLOAD='{"state":"failure","description":"E2E tests have failed!","context":"E2E"}'

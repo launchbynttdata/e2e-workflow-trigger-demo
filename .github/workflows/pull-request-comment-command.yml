@@ -4,6 +4,7 @@ on:
 
 permissions:
   checks: write
+  statuses: write
   contents: write
   pull-requests: write
   actions: write
@@ -32,6 +33,12 @@ jobs:
           echo "branch-name=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
           echo "sha=$SHA" >> "$GITHUB_OUTPUT"
 
+      - name: React to comment
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          reactions: "rocket"
+
   call-e2e-workflow:
     if: ${{ github.event.issue.pull_request }}
     uses: launchbynttdata/e2e-workflow-trigger-demo/.github/workflows/playwright.yml@main
@@ -42,6 +49,7 @@ jobs:
   update-status-check-success:
     permissions:
       checks: write
+      statuses: write
       contents: read
     needs: [get-comment-branch, call-e2e-workflow]
     runs-on: ubuntu-latest
