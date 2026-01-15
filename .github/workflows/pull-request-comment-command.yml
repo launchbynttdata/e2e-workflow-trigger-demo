@@ -16,18 +16,21 @@ jobs:
     if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, '/test e2e') }}
     runs-on: ubuntu-latest
     outputs:
-      branch-name: ${{ steps.get-branch-name.outputs.branch-name }}
+      branch-name: ${{ steps.get-pr-details.outputs.branch-name }}
+      head-sha: ${{ steps.get-pr-details.outputs.sha }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Retrieve branch name for pull request
-        id: get-branch-name
+      - name: Retrieve PR details
+        id: get-pr-details
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           BRANCH_NAME=$(gh pr view "${{ github.event.issue.pull_request.html_url }}" --json headRefName --jq .headRefName)
+          SHA=BRANCH_NAME=$(gh pr view "${{ github.event.issue.pull_request.html_url }}" --json headRefOid --jq .headRefOid)
           echo "branch-name=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
 
   call-e2e-workflow:
     if: ${{ github.event.issue.pull_request }}
@@ -35,3 +38,13 @@ jobs:
     needs: [get-comment-branch]
     with:
       branch-name: ${{ needs.get-comment-branch.outputs.branch-name }}
+
+  update-status-check-success:
+    uses: launchbynttdata/e2e-workflow-trigger-demo/.github/actions/update-e2e-status-check@main
+    needs: [get-comment-branch, call-e2e-workflow]
+    with:
+      success: ${{ needs.call-e2e-workflow.outputs.e2e-outcome == 'success' }}
+      repo: e2e-workflow-trigger-demo
+      owner: launchbynttdata
+      sha: ${{ needs.get-comment-branch.outputs.head-sha }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

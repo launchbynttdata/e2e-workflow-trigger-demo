@@ -6,6 +6,10 @@ on:
         description: "The branch name to test"
         required: true
         type: string
+    outputs:
+      e2e-outcome:
+        description: "E2E tests outcome, one of 'success', 'failure', 'skipped', 'cancelled'"
+        value: ${{ jobs.test.outputs.e2e-outcome }}
 
 permissions:
   checks: write
@@ -14,6 +18,8 @@ permissions:
 
 jobs:
   test:
+    outputs:
+      e2e-outcome: ${{ steps.run-e2e.outcome }}
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
@@ -77,6 +83,4 @@ jobs:
         if: ${{ !cancelled() }}
         with:
           report-file: playwright-report/test-results.json
-          custom-info: "For the full test results, [download the HTML report](${{ steps.upload-artifact.outputs.artifact-url }})."
-          # pr-number: ${PR_NUMBER} ?????
           report-url: "${{ steps.upload-artifact.outputs.artifact-url }}"
