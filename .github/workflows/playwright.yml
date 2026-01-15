@@ -20,6 +20,7 @@ jobs:
   test:
     outputs:
       e2e-outcome: ${{ steps.run-e2e.outcome }}
+      e2e-summary: ${{ steps.analyze-e2e-report.outputs.summary }}
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
@@ -79,8 +80,10 @@ jobs:
           path: playwright-report/
           retention-days: 7
 
-      - uses: daun/playwright-report-summary@v3
+      - id: analyze-e2e-report
+        uses: daun/playwright-report-summary@v3
         if: ${{ !cancelled() }}
         with:
           report-file: playwright-report/test-results.json
           report-url: "${{ steps.upload-artifact.outputs.artifact-url }}"
+          create-comment: false
