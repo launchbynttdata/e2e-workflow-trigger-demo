@@ -24,68 +24,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Retrieve PR details
-        id: get-pr-details
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          BRANCH_NAME=$(gh pr view "${{ github.event.issue.pull_request.html_url }}" --json headRefName --jq .headRefName)
-          SHA=$(gh pr view "${{ github.event.issue.pull_request.html_url }}" --json headRefOid --jq .headRefOid)
-          PR_NUMBER=$(gh pr view "${{ github.event.issue.pull_request.html_url }}" --json number --jq .number)
-
-          echo "branch-name=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
-          echo "head-sha=$SHA" >> "$GITHUB_OUTPUT"
-          echo "pr-number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
-
       - name: React to comment
         uses: peter-evans/create-or-update-comment@v3
         with:
           comment-id: ${{ github.event.comment.id }}
           reactions: "rocket"
 
-      - name: Create placeholder comment
+      - name: Retrieve PR details
+        id: get-pr-details
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cat <<EOC > e2e_comment.md
-          > [!IMPORTANT]
-          > E2E test run has been triggered!
-          This comment will be updated with the outcome once the job completes.
-          EOC
-
-          # Delete the existing comment, if there is one
-          gh pr comment "${{ steps.get-pr-details.outputs.pr-number }}" --delete-last --yes || true
-          gh pr comment "${{ steps.get-pr-details.outputs.pr-number }}" --body-file e2e_comment.md
+          BRANCH_NAME=$(gh pr view "${{ github.event.issue.pull_request.html_url }}" --json headRefName --jq .headRefName)
+          echo "branch-name=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
 
   call-e2e-workflow:
     uses: launchbynttdata/e2e-workflow-trigger-demo/.github/workflows/playwright.yml@main
     needs: [get-comment-branch]
     with:
       branch-name: ${{ needs.get-comment-branch.outputs.branch-name }}
-
-  update-status-check-success:
-    permissions:
-      checks: write
-      statuses: write
-      contents: read
-      pull-requests: write
-    needs: [get-comment-branch, call-e2e-workflow]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Update Status Check
-        uses: launchbynttdata/e2e-workflow-trigger-demo/.github/actions/update-e2e-status-check@main
-        with:
-          state: ${{ needs.call-e2e-workflow.outputs.e2e-outcome }}
-          context: E2E
-          repo: e2e-workflow-trigger-demo
-          owner: launchbynttdata
-          sha: ${{ needs.get-comment-branch.outputs.head-sha }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Checkout
-        uses: actions/checkout@v5
-      - name: Write testing outcome comment
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "${{ needs.call-e2e-workflow.outputs.e2e-summary }}" > e2e_comment.md
-          gh pr comment "${{ needs.get-comment-branch.outputs.pr-number }}" --create-if-none --edit-last --body-file e2e_comment.md
