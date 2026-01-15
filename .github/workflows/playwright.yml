@@ -35,6 +35,8 @@ jobs:
           ref: ${{ inputs.branch-name }}
 
       - id: get-update-vars
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           HEAD_SHA=$(git rev-parse HEAD)
           OWNER=$(echo $GITHUB_REPOSITORY | awk -F'/' '{print $1}')
