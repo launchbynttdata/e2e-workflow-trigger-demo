@@ -40,11 +40,16 @@ jobs:
       branch-name: ${{ needs.get-comment-branch.outputs.branch-name }}
 
   update-status-check-success:
-    uses: launchbynttdata/e2e-workflow-trigger-demo/.github/actions/update-e2e-status-check@main
+    permissions:
+      checks: write
     needs: [get-comment-branch, call-e2e-workflow]
-    with:
-      success: ${{ needs.call-e2e-workflow.outputs.e2e-outcome == 'success' }}
-      repo: e2e-workflow-trigger-demo
-      owner: launchbynttdata
-      sha: ${{ needs.get-comment-branch.outputs.head-sha }}
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update Status Check
+        uses: launchbynttdata/e2e-workflow-trigger-demo/.github/actions/update-e2e-status-check@main
+        with:
+          success: ${{ needs.call-e2e-workflow.outputs.e2e-outcome == 'success' }}
+          repo: e2e-workflow-trigger-demo
+          owner: launchbynttdata
+          sha: ${{ needs.get-comment-branch.outputs.head-sha }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
