@@ -46,7 +46,8 @@ jobs:
           echo "repository=$REPOSITORY" >> "$GITHUB_OUTPUT"
           echo "target-url=$TARGET_URL" >> "$GITHUB_OUTPUT"
 
-      - name: Set E2E Check URL
+      - id: update-status-check-pending
+        name: Set E2E Check URL
         uses: launchbynttdata/e2e-workflow-trigger-demo/.github/actions/update-e2e-status-check@main
         with:
           state: pending
@@ -117,3 +118,15 @@ jobs:
           report-file: playwright-report/test-results.json
           report-url: "${{ steps.upload-artifact.outputs.artifact-url }}"
           create-comment: false
+
+      - id: update-status-check-complete
+        name: Update Status
+        uses: launchbynttdata/e2e-workflow-trigger-demo/.github/actions/update-e2e-status-check@main
+        with:
+          state: ${{ steps.run-e2e.outcome }}
+          context: E2E
+          sha: ${{ steps.get-update-vars.outputs.head-sha }}
+          owner: ${{ steps.get-update-vars.outputs.owner }}
+          repo: ${{ steps.get-update-vars.outputs.repository }}
+          target_url: ${{ steps.get-update-vars.outputs.target-url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
