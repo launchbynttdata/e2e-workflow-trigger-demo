@@ -10,6 +10,9 @@ on:
       e2e-outcome:
         description: "E2E tests outcome, one of 'success', 'failure', 'skipped', 'cancelled'"
         value: ${{ jobs.test.outputs.e2e-outcome }}
+      e2e-summary:
+        description: "E2E summary in markdown format"
+        value: ${{ jobs.test.outputs.e2e-summary }}
 
 permissions:
   checks: write
