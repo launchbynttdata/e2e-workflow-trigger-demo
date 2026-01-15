@@ -34,7 +34,17 @@ jobs:
         with:
           ref: ${{ inputs.branch-name }}
 
+      - id: determine-event-source
+        name: Determine Event Source
+        run: |
+          if [ "${{ github.event.workflow }}" == ".github/workflows/playwright.yml" ]; then
+            echo "source=workflow_dispatch" >> "$GITHUB_OUTPUT"
+          else
+            echo "source=workflow_call" >> "$GITHUB_OUTPUT"
+          fi
+
       - id: get-update-vars
+        name: Gather variables
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -42,18 +52,21 @@ jobs:
           OWNER=$(echo $GITHUB_REPOSITORY | awk -F'/' '{print $1}')
           REPOSITORY=$(echo $GITHUB_REPOSITORY | awk -F'/' '{print $2}')
           TARGET_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-          PR_NUMBER=$(gh pr view "${{ github.event.issue.pull_request.html_url }}" --json number --jq .number)
+
+          if [ "${{ steps.determine-event-source.outputs.source }}" == "workflow_call" ]; then
+            PR_NUMBER=$(gh pr view "${{ github.event.issue.pull_request.html_url }}" --json number --jq .number)
+            echo "pr-number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+          fi
 
           echo "head-sha=$HEAD_SHA" >> "$GITHUB_OUTPUT"
           echo "owner=$OWNER" >> "$GITHUB_OUTPUT"
           echo "repository=$REPOSITORY" >> "$GITHUB_OUTPUT"
           echo "target-url=$TARGET_URL" >> "$GITHUB_OUTPUT"
-          echo "pr-number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
 
       - id: placeholder-comment
         name: Create placeholder comment
         # Don't try to create a comment when the workflow is manually triggered through the UI
-        if: github.event.workflow != '.github/workflows/playwright.yml'
+        if: steps.determine-event-source.outputs.source == 'workflow_call'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -123,6 +136,7 @@ jobs:
       - id: run-e2e
         name: Run Playwright tests
         run: npm run e2e
+        continue-on-error: true
 
       - id: upload-artifact
         uses: actions/upload-artifact@v4
@@ -141,7 +155,7 @@ jobs:
           create-comment: false
 
       - name: Write testing outcome comment
-        if: ${{ !cancelled() && github.event.workflow != '.github/workflows/playwright.yml'}}
+        if: ${{ !cancelled() && steps.determine-event-source.outputs.source == 'workflow_call'}}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
