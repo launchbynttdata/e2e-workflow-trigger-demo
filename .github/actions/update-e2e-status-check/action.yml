@@ -1,15 +1,19 @@
 name: Update E2E Status Check
 description: Updates the status check for a commit.
 inputs:
-  status:
-    description: "Status to set on the check, one of 'expected', 'completed', 'in_progress'"
+  state:
+    description: "State to set on the check, e.g. 'expected', 'completed', 'in_progress'"
     required: true
   conclusion:
-    description: "If the check is in a 'completed' status, provide a conclusion like 'success', 'failure', 'cancelled', etc."
-    required: true
+    description: "If the check is in a 'completed' status, you must provide a conclusion like 'success', 'failure', 'cancelled', etc."
+    required: false
   context:
     description: "Context of the status check, e.g. 'E2E'"
     required: true
+  description:
+    description: "Description to set on the status check"
+    default: ""
+    required: false
   sha:
     description: "SHA of the commit on which to create the status check"
     required: true
@@ -36,11 +40,15 @@ runs:
       id: create-status
       shell: bash
       run: |
-        if [ "${{ inputs.success }}" == "true" ]; then 
-          PAYLOAD='{"state":"success","description":"E2E tests have passed","context":"E2E"}'
-        else
-          PAYLOAD='{"state":"failure","description":"E2E tests have failed!","context":"E2E"}'
+        cat <<EOC > status-payload.json
+        {"state":"${{ inputs.state }}","description":"${{ inputs.description }}","context":"${{ inputs.context }}"}
+        EOC
+
+        if [ "${{ inputs.state }}" == "completed" ]; then 
+          tmpfile=$(mktemp)
+          jq '.conclusion = "${{ inputs.conclusion }}"' status-payload.json > "$tmpfile" && mv "$tmpfile" status-payload.json
         fi
+
         curl -L \
           -X POST \
           -H "Accept: application/vnd.github+json" \
