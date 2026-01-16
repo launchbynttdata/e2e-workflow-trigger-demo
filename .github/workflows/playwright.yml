@@ -37,6 +37,8 @@ jobs:
       - id: prereqs
         run: |
           apt update -yqq && apt install gh -yqq
+          # Fix "dubious ownership" errors in container
+          git config --global --add safe.directory $GITHUB_WORKSPACE
 
       - id: checkout
         uses: actions/checkout@v5
