@@ -35,6 +35,10 @@ jobs:
       image: mcr.microsoft.com/playwright:v1.57.0-noble
       options: --user 1001
     steps:
+      - id: prereqs
+        run: |
+          apt update -yqq && apt install gh -yqq
+
       - id: checkout
         uses: actions/checkout@v5
         with:
