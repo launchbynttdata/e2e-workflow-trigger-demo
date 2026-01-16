@@ -4,9 +4,6 @@ inputs:
   state:
     description: "State to set on the check, e.g. 'expected', 'completed', 'in_progress'"
     required: true
-  conclusion:
-    description: "If the check is in a 'completed' status, you must provide a conclusion like 'success', 'failure', 'cancelled', etc."
-    required: false
   context:
     description: "Context of the status check, e.g. 'E2E'"
     required: true
@@ -46,9 +43,10 @@ runs:
         {"state":"${{ inputs.state }}","description":"${{ inputs.description }}","context":"${{ inputs.context }}"}
         EOC
 
-        if [ "${{ inputs.state }}" == "completed" ]; then 
+        # If an E2E run is cancelled or skipped, we still need to run it later, so pending seems reasonable
+        if [[ "${{ inputs.state }}" == "cancelled" || "${{ inputs.state }}" == "skipped" ]]; then 
           tmpfile=$(mktemp)
-          jq '.conclusion = "${{ inputs.conclusion }}"' status-payload.json > "$tmpfile" && mv "$tmpfile" status-payload.json
+          jq '.state = "pending"' status-payload.json > "$tmpfile" && mv "$tmpfile" status-payload.json
         fi
 
         if [ "${{ inputs.target_url }}" != "" ]; then 
@@ -62,4 +60,4 @@ runs:
           -H "Authorization: Bearer ${{ inputs.GITHUB_TOKEN }}" \
           -H "X-GitHub-Api-Version: 2022-11-28" \
           https://api.github.com/repos/${{ inputs.owner }}/${{ inputs.repo }}/statuses/${{ inputs.sha }} \
-          --data "@status-payload.json"
+          --data "@status-payload.json" || cat status-payload.json

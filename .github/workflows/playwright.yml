@@ -24,6 +24,7 @@ permissions:
 
 jobs:
   test:
+    name: Run E2E Tests
     outputs:
       e2e-outcome: ${{ steps.run-e2e.outcome }}
       e2e-summary: ${{ steps.analyze-e2e-report.outputs.summary }}
