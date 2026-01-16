@@ -14,6 +14,17 @@ on:
         description: "E2E summary in markdown format"
         value: ${{ jobs.test.outputs.e2e-summary }}
   workflow_dispatch:
+    inputs:
+      target_environment:
+        type: choice
+        description: Where to target the E2E tests
+        required: true
+        options:
+          - local
+          - dev
+          - staging
+          - clientsandbox
+          - production
 
 permissions:
   checks: write
@@ -152,6 +163,7 @@ jobs:
         name: Run Playwright tests
         env:
           HOME: /root
+          E2E_ENV: local
         shell: bash
         run: npm run e2e
         continue-on-error: true
