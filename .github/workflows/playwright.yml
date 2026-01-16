@@ -48,7 +48,7 @@ jobs:
       - id: determine-event-source
         name: Determine Event Source
         run: |
-          if [ "${{ github.event.workflow }}" == ".github/workflows/playwright.yml" ]; then
+          if [[ "${{ github.event.workflow }}" == ".github/workflows/playwright.yml" ]]; then
             echo "source=workflow_dispatch" >> "$GITHUB_OUTPUT"
           else
             echo "source=workflow_call" >> "$GITHUB_OUTPUT"
@@ -64,7 +64,7 @@ jobs:
           REPOSITORY=$(echo $GITHUB_REPOSITORY | awk -F'/' '{print $2}')
           TARGET_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 
-          if [ "${{ steps.determine-event-source.outputs.source }}" == "workflow_call" ]; then
+          if [[ "${{ steps.determine-event-source.outputs.source }}" == "workflow_call" ]]; then
             PR_NUMBER=$(gh pr view "${{ github.event.issue.pull_request.html_url }}" --json number --jq .number)
             echo "pr-number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
           fi
