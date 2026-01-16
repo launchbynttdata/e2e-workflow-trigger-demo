@@ -36,6 +36,7 @@ jobs:
     steps:
       - id: prereqs
         name: Install GH CLI
+        shell: bash
         run: |
           # Install GH CLI
           (type -p wget >/dev/null || (apt update && apt install wget -y)) \
@@ -58,6 +59,7 @@ jobs:
 
       - id: determine-event-source
         name: Determine Event Source
+        shell: bash
         run: |
           if [[ "${{ github.event.workflow }}" == ".github/workflows/playwright.yml" ]]; then
             echo "source=workflow_dispatch" >> "$GITHUB_OUTPUT"
@@ -69,6 +71,7 @@ jobs:
         name: Gather variables
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
         run: |
           HEAD_SHA=$(git rev-parse HEAD)
           OWNER=$(echo $GITHUB_REPOSITORY | awk -F'/' '{print $1}')
@@ -91,6 +94,7 @@ jobs:
         if: steps.determine-event-source.outputs.source == 'workflow_call'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
         run: |
           cat <<EOC > e2e_comment.md
           > [!IMPORTANT]
@@ -129,9 +133,11 @@ jobs:
 
       - name: Install dependencies
         if: ${{ steps.cache-node.outputs.cache-hit != 'true' }}
+        shell: bash
         run: npm ci
 
       - name: Install Playwright Browsers
+        shell: bash
         run: npx playwright install --with-deps
 
       - name: Cache node_modules
@@ -144,6 +150,7 @@ jobs:
 
       - id: run-e2e
         name: Run Playwright tests
+        shell: bash
         run: npm run e2e
         continue-on-error: true
 
@@ -168,6 +175,7 @@ jobs:
         if: ${{ !cancelled() && steps.determine-event-source.outputs.source == 'workflow_call'}}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
         run: |
           echo "${{ steps.analyze-e2e-report.outputs.summary }}" > e2e_comment.md
           gh pr comment "${{ steps.get-update-vars.outputs.pr-number }}" --create-if-none --edit-last --body-file e2e_comment.md
