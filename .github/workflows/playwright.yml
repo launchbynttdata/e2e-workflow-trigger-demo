@@ -150,6 +150,8 @@ jobs:
 
       - id: run-e2e
         name: Run Playwright tests
+        env:
+          HOME: /root
         shell: bash
         run: npm run e2e
         continue-on-error: true
