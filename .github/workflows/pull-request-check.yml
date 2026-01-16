@@ -22,7 +22,7 @@ jobs:
         id: cache
         with:
           path: ./node_modules
-          key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
+          key: ${{ runner.os }}-check-node_modules-${{ hashFiles('package-lock.json') }}
 
       - name: Install dependencies
         run: npm install
@@ -33,7 +33,7 @@ jobs:
         if: ${{ steps.cache.outputs.cache-hit != 'true' }}
         with:
           path: ./node_modules
-          key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
+          key: ${{ runner.os }}-check-node_modules-${{ hashFiles('package-lock.json') }}
 
       - name: Lint code
         run: npm run lint
