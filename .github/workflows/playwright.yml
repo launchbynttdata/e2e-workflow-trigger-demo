@@ -29,6 +29,10 @@ jobs:
       e2e-summary: ${{ steps.analyze-e2e-report.outputs.summary }}
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    container:
+      # Need to figure out how to drive this tag based on package.json version
+      image: mcr.microsoft.com/playwright:v1.57.0-noble
+      options: --user 1001
     steps:
       - id: checkout
         uses: actions/checkout@v5
